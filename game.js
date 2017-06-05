@@ -189,9 +189,9 @@ class LevelParser {
             for (let y in plan) {
                 let line = plan[y].split(''); 
                 for (let x in line) {
-                    line[x] = this.actorFromSymbol(line[x]);
-                    if (line[x] !== undefined) {
-                        actors.push(new line[x](new Vector(x, y)));
+                    let classA = this.actorFromSymbol(line[x]);
+                    if (classA !== undefined && typeof(classA) === 'function') {
+                        actors.push(new classA(new Vector(x, y)));
                     }
                 }
             }
