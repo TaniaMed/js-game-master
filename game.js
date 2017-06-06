@@ -146,8 +146,8 @@ class Level {
 
 class LevelParser {
     constructor(obj = {'@': Player}) {
-        this.name = Object.getOwnPropertyNames(obj)[0];
-        this.value = obj[this.name];       
+        this.name = Object.getOwnPropertyNames(obj);
+        this.value = obj[this.name]
     }  
     actorFromSymbol(symbol = undefined) {
         let actorChars = {
@@ -183,16 +183,21 @@ class LevelParser {
        } 
        return grid;
     }    
-    createActors(plan = []) {
+    createActors(plan = []) {        
        let actors = [];
        if (plan.length > 0) {
             for (let y in plan) {
                 let line = plan[y].split(''); 
                 for (let x in line) {
                     let classA = this.actorFromSymbol(line[x]);
-                    if (classA !== undefined && typeof(classA) === 'function') {
-                        actors.push(new classA(new Vector(x, y)));
-                    }
+                    if (classA !== undefined &&          
+                       (Actor === classA.__proto__ || 
+                        Actor === classA || 
+                        Player === classA)) 
+                    {                        
+                        let actor = new classA(new Vector(x, y));
+                        actors.push(actor);
+                    } 
                 }
             }
        } 
