@@ -6,6 +6,8 @@ class Vector {
 		this.y = y;
 	}	
 	plus(vector) {
+	    // expect это функция из библиотеки для тестирования, в коде её не нужно использовать
+        // здесь нужно просто проверить тип аргумента
         expect(vector).to.eql(new Vector(vector.x, vector.y));
 		return new Vector(this.x + vector.x, this.y + vector.y);
 	}
@@ -20,9 +22,12 @@ class Actor {
 		this.size = size;
 		this.speed = speed;
         
+		// Это лучше вынести в начало функции, и сделать 3 отдельных if, чтобы было понятнее
         if (!(position instanceof Vector) ||
             !(size instanceof Vector) ||
             !(speed instanceof Vector)) {
+            // переменная e не определена,
+            // тут нужно что-то вроде throw new Error('position must be Vector')
             throw e;
         }
     }
@@ -44,11 +49,15 @@ class Actor {
 	act() {
 	}    
 	isIntersect(actor) {        
+	    // см. выше
 		expect(actor).to.eql(new Actor(actor.pos, actor.size, actor.speed));
 
         let xColl = false;
         let yColl = false;
 
+        // очень сложное услови
+        // должно быть так: если выше - false, если ниже - false, если правее - false, если левее - false
+        // иначе true
         if (this.right >= actor.left && this.left <= actor.right) xColl = true;
         if (this.bottom >= actor.top && this.top <= actor.bottom) yColl = true;
         if (this.bottom === actor.bottom && this.top === actor.top &&
@@ -67,6 +76,7 @@ class Actor {
 class Fireball extends Actor {
     constructor(position = new Vector(0, 0), speed = new Vector(0, 0), size = new Vector(1, 1)) {
         super(position, speed, size); 
+        // это линие операчии, поля заполняются в конструкторе базового класса
         this.speed = speed;
         this.pos = position;
         this.size = size;
@@ -91,12 +101,14 @@ class Fireball extends Actor {
 }    
 
 class HorizontalFireball extends Fireball {
+    // здесь конструтор должен принимать 1 аргумент
     constructor(position = new Vector(0, 0), speed = new Vector(2, 0), size = new Vector(1, 1)) {
         super(position, speed, size); 
     }
 }
 
 class VerticalFireball extends Fireball {
+    // здесь тоже 1 аргумент
     constructor(position = new Vector(0, 0), speed = new Vector(0, 2), size = new Vector(1, 1)) {
         super(position, speed, size); 
     }
@@ -104,8 +116,9 @@ class VerticalFireball extends Fireball {
 
 class FireRain extends Fireball {
     constructor(position = new Vector(0, 0)) {
-        super(position); 
-        this.speed = new Vector(0, 3);     
+        super(position);
+        // это нужно передать в базовый конструтор
+        this.speed = new Vector(0, 3);
         this.position = position;
     }
     get type() {
@@ -117,8 +130,10 @@ class FireRain extends Fireball {
 } 
 
 class Coin extends Actor {
-    constructor(position = new Vector(1, 1), size = new Vector(0.6, 0.6)) { 
-        super(position, size); 
+    // 1 аргумент
+    constructor(position = new Vector(1, 1), size = new Vector(0.6, 0.6)) {
+        super(position, size);
+        // post через базовый конструктор
         this.pos = new Vector(position.x + 0.2, position.y + 0.1);
         this.springSpeed = 8;
         this.springDist = 0.07;
@@ -145,8 +160,10 @@ class Coin extends Actor {
    } 
 }
 
+// Должен наследоваться от класса Actor
 class Player {
     constructor(pos = new Vector(0, 0.5)) {
+        // через базовый конструтор
         this.pos =  new Vector(pos.x + 0, pos.y - 0.5);
         this.size = new Vector(0.8, 1.5);     
     }
@@ -157,18 +174,22 @@ class Player {
 
 class Level {
 	constructor(grid = [], actors = []) {
+	    // здесь лучше создать копию массива, чтобы изменения не отражались во вне
+        // Array.from() или .slice(0)
         this.grid = grid;
         this.actors = actors;
 		this.status = null;
         this.finishDelay = 1;            
 	}
     get player() {
-       return this.actors.filter(actor => actor.type === 'player')[0];       
+	    // здесь лучше использовать метод find
+       return this.actors.filter(actor => actor.type === 'player')[0];
     }
     get height() {
         return this.grid.length;
     }
     get width() {
+	    // это лучше посчитать один раз в конструктое
         let goodLength = 0;
         if (this.grid.length > 0) {
             goodLength = this.grid[0].length;
@@ -180,11 +201,14 @@ class Level {
         return goodLength;
     }
     isFinished() {
-        return this.status !== null && this.finishDelay < 0 ? true : false;   
+	    // тренарное сравнение лишнее
+        // ? true : false; можно просто убрать
+        return this.status !== null && this.finishDelay < 0 ? true : false;
 	}
     actorAt(actor = undefined) {
        for (let num in this.actors) {
             let other = this.actors[num];
+            // здесь нужно использовать метод isIntersect
             if (other !== actor &&
                 actor.pos.x + actor.size.x > other.pos.x &&
                 actor.pos.x < other.pos.x + other.size.x &&
@@ -200,6 +224,7 @@ class Level {
         let yStart = Math.floor(pos.y);
         let yEnd = Math.ceil(pos.y + size.y);
 
+        // фигурные скобки у if лучше не опускать
         if (xStart < 0 || xEnd > this.width || yStart < 0)
             return "wall";
         if (yEnd > this.height)
@@ -226,8 +251,11 @@ class Level {
        if (type === 'lava' || type === 'fireball') {
             this.status = 'lost';
             this.finishDelay = 1;
+            // тут лучше добавить return и убрать else
         } else if (type === 'coin') {
+           // здесь нужно использовать removeActor
             this.actors = this.actors.filter(other => other !== actor);
+           // тут нужно использовать noMoreActors
             if (!this.actors.some(actor => actor.type === 'coin')) {
                 this.status = "won";
                 this.finishDelay = 1;
@@ -237,11 +265,14 @@ class Level {
 }
 
 class LevelParser {
+    // по умолчанию должен быть пустой объект
     constructor(obj = {'@': Player}) {
+        // это что-то неправильно, здесь нужно просто сохранить переданный словарь
         this.name = Object.getOwnPropertyNames(obj);
         this.value = obj[this.name]
     }  
     actorFromSymbol(symbol = undefined) {
+        // здесь нужно использовать схему переданную в конструктор
         let actorChars = {
                             '@': Player,
                             'o': Coin,
@@ -264,6 +295,7 @@ class LevelParser {
     }
     createGrid(plan = []) {
        let grid = [];
+       // можно не проверять длину, for (let y in plan) { на пустом массиве сразу закончится
        if (plan.length > 0) {
             for (let y in plan) {
                 let line = plan[y].split(''); 
@@ -277,6 +309,7 @@ class LevelParser {
     }    
     createActors(plan = []) {        
        let actors = [];
+       // см. предыдущий комментарий
        if (plan.length > 0) {
             for (let y in plan) {
                 let line = plan[y].split(''); 
@@ -299,3 +332,5 @@ class LevelParser {
         return new Level(grid, actors);        
     }
 }
+
+// Здесь нужно запустить игру (см. раздел "Реализованные компоненты, которые необходимо использовать")
