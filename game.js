@@ -17,7 +17,7 @@ class Vector {
 }
 
 class Actor {    
-	constructor(position = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) { 
+    constructor(position = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) { 
         
         if (!(position instanceof Vector)) {
             throw new Error('position must be Vector');
@@ -48,9 +48,9 @@ class Actor {
     get bottom() {
         return this.pos.y + this.size.y;
     }
-	act() {
+    act() {
 	}    
-	isIntersect(actor) {        
+    isIntersect(actor) {        
 	    if (!(actor instanceof Actor)) { 
             throw new Error('actor must be Actor');
         }
@@ -146,13 +146,10 @@ class Level {
 
 class LevelParser {
     constructor(list = {}) {
-        this.list = list;
+        this.list = Object.assign({}, list);
     }  
-    get simbol() {
-        return this.list;
-    }
     actorFromSymbol(symbol = undefined) {
-        return this.simbol[symbol];
+        return this.list[symbol];
     }
     obstacleFromSymbol(symbol = undefined) {
         switch (symbol) {
@@ -252,8 +249,8 @@ class FireRain extends Fireball {
 
 class Coin extends Actor {
     constructor(pos = new Vector(0,0)) {
-        super(pos, new Vector(0.6, 0.6));
-        this.basePos = pos.plus(new Vector(0.2, 0.1));
+        super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6));
+        this.basePos = this.pos;
         this.springSpeed = 8;
         this.springDist = 0.07;
         
@@ -280,9 +277,8 @@ class Coin extends Actor {
 }
 
 class Player extends Actor {
-    constructor(pos) {
-        super(pos, new Vector(0.8, 1.5));
-        this.pos = this.pos.plus(new Vector(0, -0.5));
+    constructor(pos = new Vector(0, 0)) {
+        super(pos.plus(new Vector(0, -0.5)), new Vector(0.8, 1.5));
         }  
     get type() {
         return 'player';
@@ -381,6 +377,7 @@ const actorDict = {
 const parser = new LevelParser(actorDict);
 runGame(schemas, parser, DOMDisplay)
   .then(() => console.log('Вы выиграли приз!'));
+  
   
 /*const actorDict = {
     '%': ObliquelyFireball,
