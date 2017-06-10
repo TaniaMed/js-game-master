@@ -6,6 +6,8 @@ class Vector {
 		this.y = y;
 	}	
 	plus(vector) {
+	    // тут лучше обратить условие: если не вектор, то исключение, а потом основной кейс.
+        // Лучше потому что в таком случае основной код имеет меньшую вложенность
         if (vector instanceof Vector) {
             return new Vector(this.x + vector.x, this.y + vector.y);
         }
@@ -18,8 +20,11 @@ class Vector {
 
 class Actor {    
 	constructor(position = new Vector(0, 0), size = new Vector(1, 1), speed = new Vector(0, 0)) { 
+	    // лишнее поле класса
         this.err = new Error('position must be Vector');
         
+        // Здесь можно не сокращать код - на каждое условие выкидывать new Error с нужным сообщением
+        // фигурные скобки у if лучше не опускать
         if (!(position instanceof Vector)) throw this.err;
         if (!(size instanceof Vector)) throw this.err;
         if (!(speed instanceof Vector)) throw this.err;
@@ -47,10 +52,12 @@ class Actor {
 	}    
 	isIntersect(actor) {        
 	    if (!(actor instanceof Actor)) { 
+	        // тут будет сообщение position must be Vector, лучше создать новую ошибку (new Error)
             throw this.err;
         }
         if (actor === this) {
             return false;
+        // тут и ниже else можно не писать, т.к. if заканчивается на return
         } else if (actor.left >= this.right) {
             return false;
         } else if (actor.top >= this.bottom) {
@@ -74,7 +81,9 @@ class Level {
         this.finishDelay = 1; 
         
         let goodLength = 0;
+        // проверка длины тут не нужна, forEach на пустом массиве просто не вызовет переданную функцию
         if (this.grid.length > 0) {
+            // давает попробуем тут использовать метод reduce - признак программисткого мастерства :)
             this.grid.forEach(function(line) { 
                                 if (line.length > goodLength) {
                                     goodLength = line.length;
@@ -90,6 +99,8 @@ class Level {
         return this.status !== null && this.finishDelay < 0;
 	}
     actorAt(actor = undefined) {
+	    // если не передать аргумент функции произойдёт ошибка
+        // тут лучше проверить, что actor является объектом класса Actor
         return this.actors.find(other => actor.isIntersect(other));
     }
     obstacleAt(pos, size) {
@@ -153,6 +164,7 @@ class LevelParser {
     }
     createGrid(plan = []) {
        let grid = [];      
+       // предлагаю тут сделать через forEach и map
        for (let y in plan) {
             let line = plan[y].split(''); 
             for (let x in line) {
@@ -164,6 +176,7 @@ class LevelParser {
     }    
     createActors(plan = []) { 
         let actors = [];    
+        // попробуйте написать это через 2 forEach
         for (let x = 0; x < plan.length; x++) {
             for (let y = 0; y < plan[x].length; y++) {
                 let classA = this.actorFromSymbol(plan[x][y]);
@@ -186,8 +199,10 @@ class LevelParser {
 
 
 class Fireball extends Actor {
+    // Конструктор должен принимать 2 аргумента: координаты и сокрость
     constructor(pos = new Vector(0, 0), speed = new Vector(0, 0), size = new Vector(1, 1)) {
         super(pos, speed, size); 
+        // эти поля должны заполняться в базовом корструкторе
         this.speed = speed; 
         this.size = size;
     }
@@ -202,6 +217,8 @@ class Fireball extends Actor {
     }
     act(time, level) {   
         let newPos = this.getNextPosition(time);
+        // лучше стараться не использовать условие с отрицанием
+        // если тут обратить условие, то код станет понятнее
         if (!level.obstacleAt(newPos, this.size)) {
             this.pos = newPos;
         } else { 
@@ -223,8 +240,10 @@ class VerticalFireball extends Fireball {
 }
 
 class FireRain extends Fireball {
+    // конструктор должен принимать 1 аргумент: координаты
     constructor(position = new Vector(0, 0), speed = new Vector(0, 3)) {
         super(position, speed);
+        // лучше переназвать поле вроде startPosition или initialPosition
         this.position = position;   
         
     }
@@ -239,6 +258,7 @@ class FireRain extends Fireball {
 class Coin extends Actor {
     constructor(pos) {
         super(pos);
+        // pos и size должны задаваться через конструктор базового класса
         this.pos = this.pos.plus(new Vector(0.2, 0.1));
         this.size = new Vector(0.6, 0.6);
         this.springSpeed = 8;
@@ -261,6 +281,7 @@ class Coin extends Actor {
        this.updateSpring(time);
        return this.getSpringVector(this.pos.x, this.pos.y);
    }
+   // лучше поставить значение по умолчанию, чтобы не умножать на undefined
    act(time) {
        this.pos = this.getNextPosition(time);
    } 
@@ -269,7 +290,9 @@ class Coin extends Actor {
 class Player extends Actor {
     constructor(pos) {
         super(pos, new Vector(0.8, 1.5));
+        // должно задаваться через конструктор базового класса
         this.pos = this.pos.plus(new Vector(0, -0.5));
+        // форматирование
         }  
     get type() {
         return 'player';
