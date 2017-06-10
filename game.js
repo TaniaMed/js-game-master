@@ -7,6 +7,7 @@ class Vector {
 	}	
 	plus(vector) {
         if (!(vector instanceof Vector)) {
+            // некорректное сообщение об ошибке - position тут нет
             throw new Error('position must be Vector');
         }
         return new Vector(this.x + vector.x, this.y + vector.y);
@@ -130,6 +131,8 @@ class Level {
         return !this.actors.some(actor => actor.type === type);        
     }
     playerTouched(type, actor) {
+	    // сейчас монету можно подобрать даже после столкновения с шаровой молнией
+        // посмотрите описание метода playerTouched
        if (type === 'lava' || type === 'fireball') {
             this.status = 'lost';
             return 'lost';
@@ -146,6 +149,7 @@ class Level {
 
 class LevelParser {
     constructor(list = {}) {
+        // лучше создать копию объекта, чтобы нельзя было модифицировать из вне
         this.list = list;
     }  
     actorFromSymbol(symbol = undefined) {
@@ -162,6 +166,7 @@ class LevelParser {
         }
     }
     createGrid(plan = []) {
+        // symbol
        return plan.map(line => line.split('').map(simbol =>   
                                 this.obstacleFromSymbol(simbol)));       
     }    
@@ -171,6 +176,7 @@ class LevelParser {
             line.split('').forEach((element, y) => {
                 let classA = this.actorFromSymbol(element);
                 if (typeof(classA) === 'function') {
+                    // лучше переименовать x в y, а то сейчас названия обманывают
                     let actor = new classA(new Vector(y, x));
                     if (actor instanceof Actor) {
                         actors.push(actor);
@@ -237,6 +243,7 @@ class FireRain extends Fireball {
 
 class Coin extends Actor {
     constructor(pos) {
+        // тут всё таки лучше поставить значение по-умолчанию и передать рассчитанный pos в super
         super(pos, new Vector(0.6, 0.6));
         this.pos = this.pos.plus(new Vector(0.2, 0.1));
         this.springSpeed = 8;
@@ -266,8 +273,10 @@ class Coin extends Actor {
 
 class Player extends Actor {
     constructor(pos) {
+        // тут всё таки лучше поставить значение по-умолчанию и передать рассчитанный pos в super
         super(pos, new Vector(0.8, 1.5));
         this.pos = this.pos.plus(new Vector(0, -0.5));
+        // форматирование
         }  
     get type() {
         return 'player';
@@ -284,6 +293,7 @@ const actorDict = {
 
 const parser = new LevelParser(actorDict);
 
+// Монетки должны двигаться в пределах своей ячейки, сейчас они заезжают на стены
 loadLevels()
     .then(JSON.parse)
     .then(levels => runGame(levels, parser, DOMDisplay)
