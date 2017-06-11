@@ -8,7 +8,7 @@ class Vector {
 	plus(vector) {
 	  if (!(vector instanceof Vector)) {
 	  throw new Error('vector must be Vector');
-    }
+      }
       return new Vector(this.x + vector.x, this.y + vector.y);
 	}
 	times(n) {
@@ -89,13 +89,13 @@ class Level {
     }, 0);
             
     this.height = this.grid.length;
-	}
+  }
   get player() {
     return this.actors.find(actor => actor.type === 'player');
   }
   isFinished() {
     return this.status !== null && this.finishDelay < 0;
-	}
+  }
   actorAt(actor = undefined) {
     if (!(actor instanceof Actor)) { 
       throw new Error('actor must be Actor');
