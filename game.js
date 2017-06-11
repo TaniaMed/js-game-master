@@ -7,6 +7,9 @@ class Vector {
 	}	
 	plus(vector) {
 	  if (!(vector instanceof Vector)) {
+	      // форматирование
+          // в задании написано сообщение должно быть "Можно прибавлять к вектору только вектор типа Vector"
+          // лучше сделать как задании, на всякий случай
 	  throw new Error('vector must be Vector');
       }
       return new Vector(this.x + vector.x, this.y + vector.y);
@@ -130,8 +133,11 @@ class Level {
     return !this.actors.some(actor => actor.type === type);  
   }
   playerTouched(type, actor) {
+    // Посмотрите описание метода в задании, тут нужно ещё проверить текущий статус
+    // сейччас можно собрать последнюю монетку и пройти уровень после соприкосновения с шаровой молнией
     if (type === 'lava' || type === 'fireball') {
       this.status = 'lost';
+      // метод не должен ничего возврщать - тут должен быть просто return;
       return 'lost';
     } 
     if (type === 'coin' && this.status === null) {
