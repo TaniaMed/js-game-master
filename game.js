@@ -234,6 +234,37 @@ class ObliquelyFireball extends Fireball {
   }
 }
 
+class СircularCoin extends Actor {
+  constructor(pos = new Vector(0,0)) {
+    super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6));
+    this.basePos = this.pos;
+    this.springSpeed = 8;
+    this.springDist = 2;
+        
+    let max = 0;
+    let min = 2 * Math.PI;
+    this.spring = Math.random() * (max - min) + min;
+  }
+  get type() {
+    return 'coin';
+  }
+  updateSpring(time = 1) {
+    this.spring = this.spring + this.springSpeed * time;
+  }
+  getSpringVector(x = 0, y = 0) {
+    return new Vector(x + Math.sin(this.spring) * this.springDist , y + Math.cos(this.spring) * this.springDist);
+  }
+  getNextPosition(time = 1) {
+    this.updateSpring(time);
+    return this.getSpringVector(this.basePos.x, this.basePos.y);
+  }
+  act(time = 1) {
+    this.pos = this.getNextPosition(time);
+  } 
+}
+
+
+
 class FireRain extends Fireball {
   constructor(pos) {
     super(pos, new Vector(0, 3));
@@ -290,9 +321,9 @@ const schemas = [
     "     v                 ",
     "                       ",
     "                       ",
-    "          %      o      ",
+    "         %      o      ",
     "                       ",
-    "  |          w         ",
+    "  |   #      w         ",
     "  o                 o  ",
     "  x               = x  ",
     "  x      %   o o    x  ",
@@ -305,11 +336,11 @@ const schemas = [
   [
     "        |           |  ",
     "                       ",
-    "               %       ",
+    "   #           %       ",
     "                       ",
     "                       ",
     "                       ",
-    "                       ",
+    "           #           ",
     "                       ",
     "                       ",
     "     |       %         ",
@@ -320,7 +351,7 @@ const schemas = [
     "                       "
   ],
   [
-    "                       ",
+    "             #         ",
     "                   %   ",
     "                       ",
     "    o                  ",
@@ -328,7 +359,7 @@ const schemas = [
     "         x             ",
     "                      x",
     "                       ",
-    "                       ",
+    "   #                   ",
     "          %            ",
     "               xxx     ",
     "                       ",
@@ -347,7 +378,7 @@ const schemas = [
     "  %           ",
     "              ",
     "         xxx  ",
-    "          o   ",
+    "   #      o   ",
     "        =     ",
     "  @           ",
     "  xxxx        ",
@@ -356,7 +387,7 @@ const schemas = [
     "              ",
     "          !   ",
     "              ",
-    "              ",
+    "       #      ",
     " o       x    ",
     " x      x     ",
     "       x      ",
@@ -368,6 +399,7 @@ const schemas = [
 
 const actorDict = {
   '%': ObliquelyFireball,
+  '#': СircularCoin,
   '@': Player,
   'o': Coin,
   '=': HorizontalFireball,
