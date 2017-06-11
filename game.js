@@ -1,19 +1,19 @@
 'use strict';
 
 class Vector {
-	constructor(x = 0, y = 0) {
-	  this.x = x;
-	  this.y = y;
-	}	
-	plus(vector) {
-	  if (!(vector instanceof Vector)) {
-	  throw new Error('vector must be Vector');
-      }
-      return new Vector(this.x + vector.x, this.y + vector.y);
-	}
-	times(n) {
-	  return new Vector(this.x * n, this.y * n);
-	}
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }	
+  plus(vector) {
+    if (!(vector instanceof Vector)) {
+	  throw new Error('Можно прибавлять к вектору только вектор типа Vector');
+    }
+    return new Vector(this.x + vector.x, this.y + vector.y);
+  }
+  times(n) {
+    return new Vector(this.x * n, this.y * n);
+  }
 }
 
 class Actor {    
@@ -130,15 +130,18 @@ class Level {
     return !this.actors.some(actor => actor.type === type);  
   }
   playerTouched(type, actor) {
+    if (this.status !== null) {
+        return;
+    } 
     if (type === 'lava' || type === 'fireball') {
       this.status = 'lost';
-      return 'lost';
-    } 
-    if (type === 'coin' && this.status === null) {
+      return;
+    }  
+    if (type === 'coin') {
       this.removeActor(actor);
       if (this.noMoreActors('coin')) {
         this.status = 'won';
-        return 'won';
+        return;
       }
     }
   }
@@ -234,37 +237,6 @@ class ObliquelyFireball extends Fireball {
   }
 }
 
-class СircularCoin extends Actor {
-  constructor(pos = new Vector(0,0)) {
-    super(pos.plus(new Vector(0.2, 0.1)), new Vector(0.6, 0.6));
-    this.basePos = this.pos;
-    this.springSpeed = 8;
-    this.springDist = 2;
-        
-    let max = 0;
-    let min = 2 * Math.PI;
-    this.spring = Math.random() * (max - min) + min;
-  }
-  get type() {
-    return 'coin';
-  }
-  updateSpring(time = 1) {
-    this.spring = this.spring + this.springSpeed * time;
-  }
-  getSpringVector(x = 0, y = 0) {
-    return new Vector(x + Math.sin(this.spring) * this.springDist , y + Math.cos(this.spring) * this.springDist);
-  }
-  getNextPosition(time = 1) {
-    this.updateSpring(time);
-    return this.getSpringVector(this.basePos.x, this.basePos.y);
-  }
-  act(time = 1) {
-    this.pos = this.getNextPosition(time);
-  } 
-}
-
-
-
 class FireRain extends Fireball {
   constructor(pos) {
     super(pos, new Vector(0, 3));
@@ -316,86 +288,16 @@ class Player extends Actor {
   }
 }
 
-const schemas = [
-  [
-    "     v                 ",
-    "                       ",
-    "                       ",
-    "         %      o      ",
-    "                       ",
-    "  |   #      w         ",
-    "  o                 o  ",
-    "  x               = x  ",
-    "  x      %   o o    x  ",
-    "  x  @    *  xxxxx  x  ",
-    "  xxxxx             x  ",
-    "      x!!!!!!!!!!!!!x  ",
-    "      xxxxxxxxxxxxxxx  ",
-    "                       "
-  ],
-  [
-    "        |           |  ",
-    "                       ",
-    "   #           %       ",
-    "                       ",
-    "                       ",
-    "                       ",
-    "           #           ",
-    "                       ",
-    "                       ",
-    "     |       %         ",
-    "                       ",
-    "         =      |      ",
-    " @ |  o            o   ",
-    "xxxxxxxxx!!!!!!!xxxxxxx",
-    "                       "
-  ],
-  [
-    "             #         ",
-    "                   %   ",
-    "                       ",
-    "    o                  ",
-    "    x      | x!!x=     ",
-    "         x             ",
-    "                      x",
-    "                       ",
-    "   #                   ",
-    "          %            ",
-    "               xxx     ",
-    "                       ",
-    "                       ",
-    "       xxx  |          ",
-    "                       ",
-    " @                     ",
-    "xxx                    ",
-    "                %      "
-  ], [
-    "   v         v",
-    "              ",
-    "         !o!  ",
-    "              ",
-    "              ",
-    "  %           ",
-    "              ",
-    "         xxx  ",
-    "   #      o   ",
-    "        =     ",
-    "  @           ",
-    "  xxxx        ",
-    "  |           ",
-    "      xxx    x",
-    "              ",
-    "          !   ",
-    "              ",
-    "       #      ",
-    " o       x    ",
-    " x      x     ",
-    "       x      ",
-    "      x      ",
-    "   xx         ",
-    "              "
-  ]
-];
+class СircularCoin extends Coin {
+  constructor(pos) {
+    super(pos);
+    this.springSpeed = 3;
+    this.springDist = 2;
+  }
+  getSpringVector(x = 0, y = 0) {
+    return new Vector(x + Math.sin(this.spring) * this.springDist , y + Math.cos(this.spring) * this.springDist);
+  }
+}
 
 const actorDict = {
   '%': ObliquelyFireball,
@@ -408,21 +310,8 @@ const actorDict = {
 };
 
 const parser = new LevelParser(actorDict);
-runGame(schemas, parser, DOMDisplay)
-  .then(() => console.log('Вы выиграли приз!'));
-
-/*const actorDict = {
-  '%': ObliquelyFireball,
-  '@': Player,
-  'o': Coin,
-  '=': HorizontalFireball,
-  '|': VerticalFireball,
-  'v': FireRain
-};
-
-const parser = new LevelParser(actorDict);
 
 loadLevels()
   .then(JSON.parse)
   .then(levels => runGame(levels, parser, DOMDisplay)
-    .then(() => alert('Вы победили!')));*/
+    .then(() => alert('Вы победили!')));
