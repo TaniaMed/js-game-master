@@ -2,17 +2,17 @@
 
 class Vector {
 	constructor(x = 0, y = 0) {
-		this.x = x;
-		this.y = y;
+	  this.x = x;
+	  this.y = y;
 	}	
 	plus(vector) {
-    if (!(vector instanceof Vector)) {
-      throw new Error('vector must be Vector');
+	  if (!(vector instanceof Vector)) {
+	  throw new Error('vector must be Vector');
     }
       return new Vector(this.x + vector.x, this.y + vector.y);
-  }
+	}
 	times(n) {
-		return new Vector(this.x * n, this.y * n);
+	  return new Vector(this.x * n, this.y * n);
 	}
 }
 
@@ -28,10 +28,10 @@ class Actor {
     if (!(speed instanceof Vector)) {
       throw new Error('speed must be Vector');
     }
-      
+
     this.pos = position;
-		this.size = size;
-		this.speed = speed;
+	this.size = size;
+	this.speed = speed;
   }
   get type() {
     return 'actor';
@@ -49,9 +49,9 @@ class Actor {
     return this.pos.y + this.size.y;
   }
   act() {
-	}    
+  }    
   isIntersect(actor) {        
-	  if (!(actor instanceof Actor)) { 
+	if (!(actor instanceof Actor)) { 
       throw new Error('actor must be Actor');
     }
     if (actor === this) {
@@ -78,15 +78,15 @@ class Level {
         
     this.grid = grid.slice();
     this.actors = actors.slice();
-		this.status = null;
+	this.status = null;
     this.finishDelay = 1; 
         
     this.width = this.grid.reduce(function(bestLength, newLine) {
-        if (newLine.length > bestLength) {
-          return newLine.length;
-        }
-        return bestLength;
-      }, 0);
+      if (newLine.length > bestLength) {
+        return newLine.length;
+      }
+      return bestLength;
+    }, 0);
             
     this.height = this.grid.length;
 	}
